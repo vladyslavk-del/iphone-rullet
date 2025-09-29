@@ -256,11 +256,12 @@
 
                 const allItems = document.querySelectorAll('.iphone-box');
                 const itemsArray = Array.from(allItems);
+                // --- Этот код специально находит все картинки iPhone 17 ---
                 const winnerElements = document.querySelectorAll('.iphone-17');
-                // Select a "winning" element from the middle of the list to ensure a smooth stop
+                // --- Затем он выбирает одну из них как гарантированную цель для остановки ---
                 const targetWinner = winnerElements[Math.floor(winnerElements.length / 2)];
                 
-                // Calculate stopping position
+                // Далее идут расчеты, чтобы точно остановить колесо на этой цели
                 const containerWidth = wheel.parentElement.offsetWidth;
                 const itemWidth = itemsArray[0].offsetWidth;
 
@@ -283,7 +284,7 @@
                     winningIphoneDiv.textContent = ''; // Clear text from the modal box
                     resultModal.classList.remove('hidden');
                     freezeOverlay.classList.add('hidden'); // Hide freeze overlay
-                }, 1500); // Drastically reduced to remove any perceived pause
+                }, 77); // Set delay to 77 milliseconds
             }, 2500); // Let it spin fast for 2.5 seconds before stopping
         });
         
@@ -347,4 +348,7 @@
     </script>
 </body>
 </html>
+
+
+
 

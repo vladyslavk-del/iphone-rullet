@@ -189,10 +189,8 @@
         </div>
     </div>
 
-
     <!-- Overlay for freeze effect -->
     <div id="freeze-overlay" class="hidden"></div>
-
 
     <script>
         const wheel = document.getElementById('wheel');
@@ -202,11 +200,11 @@
         const getLink = document.getElementById('get-link');
         const okButton = document.getElementById('ok-button');
         const winningIphoneDiv = document.getElementById('winning-iphone');
-        const freezeOverlay = document.getElementById('freeze-overlay');
         const timerModal = document.getElementById('timer-modal');
         const countdownTimer = document.getElementById('countdown-timer');
         const timerIphoneImage = document.getElementById('timer-iphone-image');
         const closeTimerButton = document.getElementById('close-timer-button');
+        const freezeOverlay = document.getElementById('freeze-overlay');
 
         let countdownInterval;
 
@@ -246,9 +244,9 @@
             getButton.disabled = true;
             getButton.classList.remove('hover:bg-emerald-400', 'hover:scale-105');
             getButton.classList.add('opacity-50', 'cursor-not-allowed');
-
-            freezeOverlay.classList.remove('hidden'); // Show freeze overlay
             
+            freezeOverlay.classList.remove('hidden'); // Show freeze overlay
+
             // 1. Speed up the wheel
             wheel.style.animationDuration = '1.5s';
 
@@ -285,7 +283,7 @@
                     winningIphoneDiv.textContent = ''; // Clear text from the modal box
                     resultModal.classList.remove('hidden');
                     freezeOverlay.classList.add('hidden'); // Hide freeze overlay
-                }, 5000); // 5 seconds, same as the CSS animation
+                }, 1500); // Drastically reduced to remove any perceived pause
             }, 2500); // Let it spin fast for 2.5 seconds before stopping
         });
         

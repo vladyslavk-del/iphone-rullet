@@ -34,7 +34,7 @@
             display: flex;
             height: 100%;
             will-change: transform;
-            animation: scroll 10s linear infinite;
+            animation: scroll 15s linear infinite; /* Slower default speed */
         }
         /*-Class-to-stop-the-wheel-*/
         #wheel.stopping {
@@ -84,9 +84,9 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 170px; /*-Reduced-for-mobile-*/
-            height: 170px;
+            transform: translate(-50%, -62%); /* <-- Lowered it a tiny bit */
+            width: 160px; /*-Reduced-size-*/
+            height: 160px; /*-Reduced-size-*/
             border: 4px solid #34D399; /*-Bright-green-color-*/
             border-radius: 1.5rem;
             box-shadow: 0 0 25px #34D399, inset 0 0 15px rgba(52, 211, 153, 0.5);
@@ -94,8 +94,8 @@
         }
         @media (min-width: 768px) {
             #pointer {
-                width: 220px; /*-Restored-size-for-desktop-*/
-                height: 220px;
+                width: 210px; /*-Reduced-size-for-desktop-*/
+                height: 210px; /*-Reduced-size-for-desktop-*/
             }
         }
         /*-Styles-for-modals-*/
@@ -130,6 +130,10 @@
             background-color: rgba(17, 24, 39, 0.8);
             z-index: 40;
             backdrop-filter: blur(2px);
+        }
+        #close-timer-button {
+            font-size: 2rem;
+            line-height: 1;
         }
     </style>
 </head>
@@ -175,6 +179,17 @@
         </div>
     </div>
 
+    <!-- Modal #3: Timer -->
+    <div id="timer-modal" class="modal-backdrop hidden">
+        <div class="modal-content w-11/12 md:w-1/2 lg:w-1/3 relative">
+            <button id="close-timer-button" class="absolute top-2 right-4 text-gray-400 hover:text-white">&times;</button>
+            <div id="timer-iphone-image" class="iphone-box mx-auto mb-6"></div>
+            <h2 class="text-xl md:text-2xl font-bold mb-4">You will receive your iPhone soon!</h2>
+            <div id="countdown-timer" class="text-3xl md:text-4xl font-mono font-bold text-emerald-400"></div>
+        </div>
+    </div>
+
+
     <!-- Overlay for freeze effect -->
     <div id="freeze-overlay" class="hidden"></div>
 
@@ -188,6 +203,12 @@
         const okButton = document.getElementById('ok-button');
         const winningIphoneDiv = document.getElementById('winning-iphone');
         const freezeOverlay = document.getElementById('freeze-overlay');
+        const timerModal = document.getElementById('timer-modal');
+        const countdownTimer = document.getElementById('countdown-timer');
+        const timerIphoneImage = document.getElementById('timer-iphone-image');
+        const closeTimerButton = document.getElementById('close-timer-button');
+
+        let countdownInterval;
 
         const iphoneModels = [15, 16, 17];
         const repeatedModels = [...iphoneModels, ...iphoneModels, ...iphoneModels, ...iphoneModels, ...iphoneModels, ...iphoneModels, ...iphoneModels]; // Repeat for infinite scroll effect
@@ -227,40 +248,45 @@
             getButton.classList.add('opacity-50', 'cursor-not-allowed');
 
             freezeOverlay.classList.remove('hidden'); // Show freeze overlay
-            wheel.classList.add('stopping');
+            
+            // 1. Speed up the wheel
+            wheel.style.animationDuration = '1.5s';
 
-            const allItems = document.querySelectorAll('.iphone-box');
-            const itemsArray = Array.from(allItems);
-            const winnerElements = document.querySelectorAll('.iphone-17');
-            // Select a random "winning" element from the middle of the list
-            const targetWinner = winnerElements[Math.floor(winnerElements.length / 2)];
-            
-            // Calculate stopping position
-            const wheelWidth = wheel.scrollWidth;
-            const containerWidth = wheel.parentElement.offsetWidth;
-            const itemWidth = itemsArray[0].offsetWidth;
-            const itemMargin = parseInt(window.getComputedStyle(itemsArray[0]).marginLeft) + parseInt(window.getComputedStyle(itemsArray[0]).marginRight);
-
-            // Winner's position relative to the start of the wheel
-            const winnerPosition = targetWinner.offsetLeft + itemWidth / 2;
-            
-            // Center of the container
-            const centerPoint = containerWidth / 2;
-            
-            // Final offset. We subtract half the width to center the element.
-            let finalOffset = -(winnerPosition - centerPoint);
-            
-            // Set the final position
-            wheel.style.transform = `translateX(${finalOffset}px)`;
-            
-            // Show the modal after the animation finishes
+            // 2. Wait for a moment, then start the stopping sequence
             setTimeout(() => {
-                // Winning iPhone image
-                winningIphoneDiv.style.backgroundImage = `url(https://i.postimg.cc/v4JgTW2f/i-Phone-17-Pro-Max-Render-PNG.png)`;
-                winningIphoneDiv.textContent = ''; // Clear text from the modal box
-                resultModal.classList.remove('hidden');
-                freezeOverlay.classList.add('hidden'); // Hide freeze overlay
-            }, 5000); // 5 seconds, same as the CSS animation
+                wheel.classList.add('stopping');
+
+                const allItems = document.querySelectorAll('.iphone-box');
+                const itemsArray = Array.from(allItems);
+                const winnerElements = document.querySelectorAll('.iphone-17');
+                // Select a "winning" element from the middle of the list to ensure a smooth stop
+                const targetWinner = winnerElements[Math.floor(winnerElements.length / 2)];
+                
+                // Calculate stopping position
+                const containerWidth = wheel.parentElement.offsetWidth;
+                const itemWidth = itemsArray[0].offsetWidth;
+
+                // Winner's position relative to the start of the wheel
+                const winnerPosition = targetWinner.offsetLeft + itemWidth / 2;
+                
+                // Center of the container
+                const centerPoint = containerWidth / 2;
+                
+                // Final offset. We subtract half the width to center the element.
+                let finalOffset = -(winnerPosition - centerPoint);
+                
+                // Set the final position
+                wheel.style.transform = `translateX(${finalOffset}px)`;
+                
+                // Show the modal after the animation finishes
+                setTimeout(() => {
+                    // Winning iPhone image
+                    winningIphoneDiv.style.backgroundImage = `url(https://i.postimg.cc/v4JgTW2f/i-Phone-17-Pro-Max-Render-PNG.png)`;
+                    winningIphoneDiv.textContent = ''; // Clear text from the modal box
+                    resultModal.classList.remove('hidden');
+                    freezeOverlay.classList.add('hidden'); // Hide freeze overlay
+                }, 5000); // 5 seconds, same as the CSS animation
+            }, 2500); // Let it spin fast for 2.5 seconds before stopping
         });
         
         // On "Get your new iPhone" link click
@@ -271,20 +297,53 @@
 
         // On "OK" click in the form
         okButton.addEventListener('click', () => {
-            const name = document.getElementById('name-input').value;
-            const address = document.getElementById('address-input').value;
-            console.log('Name:', name, 'Address:', address);
             mapModal.classList.add('hidden');
-            // Reset the game
+            timerIphoneImage.style.backgroundImage = `url(https://i.postimg.cc/v4JgTW2f/i-Phone-17-Pro-Max-Render-PNG.png)`;
+            timerModal.classList.remove('hidden');
+            startCountdown();
+        });
+
+        closeTimerButton.addEventListener('click', () => {
+            timerModal.classList.add('hidden');
+            clearInterval(countdownInterval);
             resetGame();
         });
+
+
+        function startCountdown() {
+            const countdownDuration = (2 * 24 * 60 * 60 * 1000) + (12 * 60 * 60 * 1000); // 2 days, 12 hours
+            const endTime = Date.now() + countdownDuration;
+
+            countdownInterval = setInterval(() => {
+                const now = Date.now();
+                const remaining = endTime - now;
+
+                if (remaining < 0) {
+                    clearInterval(countdownInterval);
+                    countdownTimer.textContent = "00d 00h 00m 00s";
+                    return;
+                }
+
+                const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                countdownTimer.textContent = `${String(days).padStart(2, '0')}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+            }, 1000);
+        }
 
         function resetGame() {
              wheel.classList.remove('stopping');
              wheel.style.transform = '';
+             wheel.style.animationDuration = ''; // Reset animation speed
              getButton.disabled = false;
              getButton.classList.add('hover:bg-emerald-400', 'hover:scale-105');
              getButton.classList.remove('opacity-50', 'cursor-not-allowed');
+             // Clear input fields
+             document.getElementById('name-input').value = '';
+             document.getElementById('address-input').value = '';
         }
 
     </script>
